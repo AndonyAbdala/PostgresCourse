@@ -158,3 +158,83 @@ WHERE
 GROUP BY
   followers
   ORDER BY followers ASC;
+  
+  
+-- HAVING --
+SELECT * FROM users;
+
+SELECT
+  count(*) as personas_por_pais,
+  country
+FROM
+  users
+GROUP BY
+  country
+HAVING
+  COUNT(*) > 5
+ORDER BY
+  COUNT(*) DESC;
+  
+SELECT
+  count(*) as personas_por_pais,
+  country
+FROM
+  users
+GROUP BY
+  country
+HAVING
+  COUNT(*) BETWEEN 1 and 5
+ORDER BY
+  COUNT(*) DESC;
+  
+  
+-- DISTINCT --
+SELECT DISTINCT country from users order by country asc;
+
+
+-- GROUP BY --
+SELECT
+  email,
+  SUBSTRING(email, POSITION('@' in email) + 1) as domain
+from
+  users;
+  
+SELECT
+  COUNT(*),
+  SUBSTRING(email, POSITION('@' in email) + 1) as domain
+from
+  users
+GROUP BY SUBSTRING(email, POSITION('@' in email) + 1)
+HAVING COUNT(*) > 1;
+
+
+-- SUBQUERIES --
+SELECT
+  *
+FROM
+  (
+    SELECT
+      COUNT(*),
+      SUBSTRING(email, POSITION('@' in email) + 1) as domain
+    from
+      users
+    GROUP BY
+      SUBSTRING(email, POSITION('@' in email) + 1)
+    HAVING
+      COUNT(*) > 1
+  ) as email_domains;
+
+SELECT
+  sum(total)
+FROM
+  (
+    SELECT
+      COUNT(*) as total,
+      SUBSTRING(email, POSITION('@' in email) + 1) as domain
+    from
+      users
+    GROUP BY
+      SUBSTRING(email, POSITION('@' in email) + 1)
+    HAVING
+      COUNT(*) > 1
+  ) as email_domains;
