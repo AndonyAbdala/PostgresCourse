@@ -1,0 +1,8 @@
+# Postgres data directory
+sql/postgres/
+
+# pgAdmin data
+sql/pgadmin/
+
+# Archivos temporales
+*.pid

@@ -238,3 +238,124 @@ FROM
     HAVING
       COUNT(*) > 1
   ) as email_domains;
+
+
+
+
+
+
+
+
+
+--------------------------- QUERIES FOR SECTION 5 ---------------------------
+SELECT * FROM country ORDER BY continent ASC;
+
+ALTER TABLE country
+ADD PRIMARY KEY (code);     -- This command is to add a primary key to the table
+
+SELECT * FROM country WHERE code = 'NLD';
+
+SELECT * FROM country WHERE code2 = 'NA' AND code = 'NLD';
+
+DELETE FROM country WHERE code2 = 'NA' AND code = 'NLD';
+
+ALTER TABLE country
+add CHECK (surfacearea >= 0);
+
+SELECT DISTINCT
+  continent
+from
+  country;
+  
+-- Add a constraint to avoid adding rows with non valid continents
+ALTER TABLE country ADD CHECK(
+	(continent = 'Asia'::text) OR 
+	(continent = 'South America'::text) OR 
+	(continent = 'North America'::text) OR 
+	(continent = 'Oceania'::text) OR 
+	(continent = 'Antarctica'::text) OR 
+	(continent = 'Africa'::text) OR 
+	(continent = 'Europe'::text)
+);
+
+SELECT * FROM country WHERE region = 'Central America';
+
+  
+-- Add a new contraint to an existing contraint. To do this, we need to delete the existing constraint
+ALTER TABLE country DROP CONSTRAINT "country_continent_check";
+
+-- Later apply the new full constraint
+ALTER TABLE country ADD CHECK(
+	(continent = 'Asia'::text) OR 
+	(continent = 'South America'::text) OR 
+	(continent = 'North America'::text) OR 
+	(continent = 'Oceania'::text) OR 
+	(continent = 'Antarctica'::text) OR 
+	(continent = 'Africa'::text) OR 
+	(continent = 'Europe'::text) OR 
+	(continent = 'Central America'::text)
+);
+
+-- Update data
+UPDATE country
+SET
+  continent = 'Central America'
+WHERE
+  region = 'Central America';
+  
+-- Indexes: they are used to increase the speed of queries
+CREATE UNIQUE INDEX "unique_country_name" on country (name);   -- Add UNIQUE if it is unique
+
+SELECT * FROM country WHERE continent = 'Africa';
+
+CREATE INDEX "country_continent" on country (continent);
+
+
+
+SELECT * FROM city;
+
+CREATE UNIQUE INDEX "unique_name_countrycode_district" on city (name, countrycode, district);
+
+SELECT * FROM city WHERE name='Jinzhou' and countrycode = 'CHN' and district = 'Liaoning';
+
+CREATE INDEX "index_district" on city (district);
+
+
+-- Create Foreing keys
+ALTER TABLE city ADD CONSTRAINT fk_country_code FOREIGN KEY (countrycode) REFERENCES country (code);  -- To add the foreing key, we need to ensure that all keys in child exist in parent (foreing keys). in this case, there is no AFG in country table
+
+SELECT * FROM country WHERE code = 'AFG';
+SELECT * FROM city WHERE countrycode = 'AFG';
+
+INSERT INTO country
+		values('AFG', 'Afghanistan', 'Asia', 'Southern Asia', 652860, 1919, 40000000, 62, 69000000, NULL, 'Afghanistan', 'Totalitarian', NULL, NULL, 'AF');  -- It created Afganistan
+
+-- Add foreing key in countrylanguage table
+SELECT * FROM countrylanguage;
+ALTER TABLE countrylanguage ADD CONSTRAINT fk_country_code FOREIGN KEY (countrycode) REFERENCES country (code);
+
+SELECT * from country WHERE code = 'AFG';
+SELECT * from city WHERE countrycode = 'AFG';
+
+DELETE FROM country WHERE code = 'AFG';  -- If we try to delete a row, but it is from a table that has foreing keys attached, it won't be possible, because other tables depends on that row
+
+ALTER TABLE city DROP CONSTRAINT fk_country_code;  -- Delete existing constraint
+ALTER TABLE countrylanguage DROP CONSTRAINT fk_country_code;    -- Delete existing constraint
+
+ALTER TABLE city     
+ADD CONSTRAINT fk_country_code
+FOREIGN KEY (countrycode)
+REFERENCES country(code)
+ON DELETE CASCADE; -- Recreate existing constraint with CASCADE
+
+ALTER TABLE countrylanguage     
+ADD CONSTRAINT fk_country_code
+FOREIGN KEY (countrycode)
+REFERENCES country(code)
+ON DELETE CASCADE; -- Recreate existing constraint with CASCADE
+
+DELETE FROM country WHERE code = 'AFG';   -- Try again to delete that row
+
+SELECT * FROM country WHERE code = 'AFG';
+SELECT * FROM city WHERE countrycode = 'AFG';
+SELECT * FROM countrylanguage WHERE countrycode = 'AFG';
